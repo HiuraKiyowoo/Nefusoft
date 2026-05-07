@@ -56,26 +56,24 @@ const normaliseDetail = (raw) => {
   if (!raw) return null;
   const item = Array.isArray(raw) ? raw[0] : raw;
   return {
-    title:        item.judul        || item.title       || '',
-    image_poster: item.cover        || item.image_poster || '',
-    image_cover:  item.cover        || item.image_cover  || '',
-    synopsis:     item.sinopsis     || item.synopsis     || '',
+    title:        item.judul        || '',
+    image_poster: item.cover        || '',
+    image_cover:  item.cover        || '',
+    synopsis:     item.sinopsis     || '',
     type:         item.type         || 'TV',
     status:       item.status       || '',
-    aired_start:  item.aired_start  || item.tahun        || '',
-    year:         item.year         || item.tahun        || '',
-    studio:       item.studio       || '',
-    day:          item.day          || item.hari         || '',
-    favorites:    item.score        || item.rating       || item.favorites || '',
+    aired_start:  item.published    || '',  // ← "published" bukan "aired_start"
+    year:         item.published?.split(' ').pop() || '', // ambil tahun dari "Oct 2, 2020"
+    studio:       item.author       || '',  // ← "author" bukan "studio"
+    day:          item.day          || '',
+    favorites:    item.rating       || '',  // ← "rating" bukan "favorites"
     synonyms:     item.synonyms     || '',
     genre:        Array.isArray(item.genre)
                     ? item.genre.join(', ')
-                    : (item.genre || ''),
-    // episode_list: chapter array dari API baru
-    // Format: [{ ch: "12", url: "mnt-episode-12-sub-indo/" }]
-    episode_list: (item.chapter || []).map((ep, i) => ({
-      id:    ep.url,          // pakai url sebagai id unik
-      index: ep.ch || String(i + 1),
+                    : (item.genre   || ''),
+    episode_list: (item.chapter || []).map((ep) => ({
+      id:    ep.url,
+      index: ep.ch,   // ← "ch" sudah string seperti "12 (End)", "1", dll
       url:   ep.url,
     })),
   };
