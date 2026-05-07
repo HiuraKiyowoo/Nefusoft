@@ -8,7 +8,7 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [liveResults, setLiveResults] = useState([]);
   const [isLiveLoading, setIsLiveLoading] = useState(false);
-  const[showLoginPopup, setShowLoginPopup] = useState(false);
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
   const searchInputRef = useRef(null);
 
   useEffect(() => {
@@ -27,8 +27,11 @@ const Navbar = () => {
       if (searchQuery.length > 2) {
         setIsLiveLoading(true);
         try {
-          const res = await fetch(`/api/v1/search?q=${encodeURIComponent(searchQuery)}`).then(r => r.json());
-          setLiveResults(res.data || []);
+          const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
+          const data = await res.json();
+          // ✅ FIX: Ambil dari data.data[0].result
+          const results = data.data?.[0]?.result || [];
+          setLiveResults(results);
         } catch (e) {
           setLiveResults([]);
         }
@@ -48,7 +51,7 @@ const Navbar = () => {
     }
   };
 
-  const navLinks =[
+  const navLinks = [
     { path: '/home', label: 'Home', icon: <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/> },
     { path: '/explore', label: 'Explore', icon: <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/> },
     { path: '/history', label: 'History', icon: <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/> },
@@ -105,12 +108,22 @@ const Navbar = () => {
             {isLiveLoading ? (
               <div className="p-6 text-center text-[#F6CF80] text-xs font-bold">mencari...</div>
             ) : liveResults.length > 0 ? (
-              liveResults.map(r => (
-                <div key={r.id} onClick={() => { navigate(`/anime/${r.id}-${(r.title||'').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`); setIsSearchOpen(false); }} className="flex items-center gap-4 p-3 hover:bg-white/5 cursor-pointer border-b border-white/5 transition-colors">
-                  <img src={r.image_poster} referrerPolicy="no-referrer" className="w-10 aspect-[3/4.5] object-cover rounded-md shadow-md" />
+              liveResults.map((r) => (
+                <div 
+                  key={r.id} 
+                  onClick={() => { 
+                    // ✅ FIX: Pakai r.url bukan r.id, dan hapus slug tambahan
+                    navigate(`/anime/${r.url.replace(/\/$/, '')}`); 
+                    setIsSearchOpen(false); 
+                  }} 
+                  className="flex items-center gap-4 p-3 hover:bg-white/5 cursor-pointer border-b border-white/5 transition-colors"
+                >
+                  <img src={r.cover} referrerPolicy="no-referrer" className="w-10 aspect-[3/4.5] object-cover rounded-md shadow-md" />
                   <div className="flex flex-col">
-                    <span className="text-white font-bold text-xs line-clamp-1">{r.title}</span>
-                    <span className="text-white/40 font-bold text-[9px] mt-1">{r.type} • {r.status}</span>
+                    {/* ✅ FIX: Pakai r.judul */}
+                    <span className="text-white font-bold text-xs line-clamp-1">{r.judul}</span>
+                    {/* ✅ FIX: Pakai r.status (type tidak ada di API) */}
+                    <span className="text-white/40 font-bold text-[9px] mt-1">{r.status}</span>
                   </div>
                 </div>
               ))
