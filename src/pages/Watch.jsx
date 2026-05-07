@@ -144,17 +144,21 @@ const Watch = () => {
         if (res.data && res.data[0]) {
           const d = res.data[0];
           const mappedAnime = {
-            ...d,
-            title: d.judul,
-            image_poster: d.cover,
-            image_cover: d.cover,
-            synopsis: d.sinopsis,
-            episode_list: (d.chapter || []).map(c => ({
-              id: c.url,
-              index: c.index,
-              title: c.title
-            }))
-          };
+  ...d,
+  title:        d.judul,
+  image_poster: d.cover,
+  image_cover:  d.cover,
+  synopsis:     d.sinopsis,
+  aired_start:  d.published,           // ← "Oct 2, 2020"
+  studio:       d.author,              // ← "C2C"
+  favorites:    d.rating,              // ← "7.4"
+  rilis:        d.published?.split(' ').pop(), // ← "2020"
+  episode_list: (d.chapter || []).map(c => ({
+    id:    c.url,
+    index: c.ch,
+    url:   c.url
+  }))
+};
           setAnime(mappedAnime);
           setEpisodes(mappedAnime.episode_list);
 
